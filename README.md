@@ -147,8 +147,12 @@ Once forked and updated with the Secrets, run your app and check the Console
 
 ![CleanShot 2023-05-25 at 14.21.16.png](images/CleanShot_2023-05-25_at_14.21.16.png)
 
-## Video
+## Videos
 
 If you are a bit curious and want to dive in the code, we’ve made a video to go over the Node JS app and the different ways to interact with the Discord bot.
 
 [https://www.loom.com/share/58af327708104dfaaec6ffb11d62b271](https://www.loom.com/share/58af327708104dfaaec6ffb11d62b271)
+
+The following Youtube video is about the Live Answer update and some details on how we are using this custom integration on our end on Discord with Tico.
+
+[https://youtu.be/H1qtBgrE8g8](https://youtu.be/H1qtBgrE8g8)
