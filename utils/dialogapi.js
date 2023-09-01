@@ -13,7 +13,7 @@ const projectID = process.env.VOICEFLOW_PROJECT_ID || null
 let session = `${versionID}.${createSession()}`
 
 module.exports = {
-  interact: async (interaction, user, isFollow, reset) => {
+  interact: async (interaction, user, isFollow, isDM, isLive, threadTitle) => {
     let action
     if (interaction?.customId?.includes('path-')) {
       action = {
@@ -32,6 +32,23 @@ module.exports = {
           intent: {
             name: `${intentName}`,
           },
+        },
+      }
+    } else if (interaction?.isLive === true) {
+      isLive = true
+
+      const messageWithoutMention = interaction.content
+        .replace(/^<@\!?(\d+)>/, '')
+        .trim()
+
+      action = {
+        type: 'intent',
+        payload: {
+          intent: {
+            name: 'live_answer',
+          },
+          query: messageWithoutMention,
+          entities: [],
         },
       }
     } else if (interaction?.options?.getString('question')) {
@@ -64,12 +81,55 @@ module.exports = {
         payload: messageWithoutMention,
       }
     }
-    await dialogAPI(interaction, user, isFollow, action)
+    await dialogAPI(
+      interaction,
+      user,
+      isFollow,
+      isDM,
+      action,
+      isLive,
+      threadTitle
+    )
   },
 }
 
-async function dialogAPI(interaction, user, isFollow, action) {
+async function saveData(user, username, isDM) {
+  const response = await axios.patch(
+    `${process.env.VOICEFLOW_API_URL}/state/user/${user}/variables`,
+    { userName: username, isDM: isDM },
+    {
+      headers: {
+        Authorization: process.env.VOICEFLOW_API_KEY,
+        'Content-Type': 'application/json',
+        versionID: versionID,
+      },
+    }
+  )
+  return
+}
+
+async function dialogAPI(
+  interaction,
+  user,
+  isFollow,
+  isDM,
+  action,
+  isLive,
+  threadTitle
+) {
   clearTimeout(noReplyTimeout)
+  let username = ''
+  if (!isDM) {
+    isDM = false
+  }
+  try {
+    username = interaction.user.username
+  } catch (error) {
+    username = interaction.author.username
+  }
+
+  await saveData(user, username, isDM)
+
   const response = await axios.post(
     `${process.env.VOICEFLOW_API_URL}/state/user/${user}/interact`,
     {
@@ -101,6 +161,17 @@ async function dialogAPI(interaction, user, isFollow, action) {
             content: trace.payload.message,
             ephemeral: true,
           })
+        } else if (isLive == true && process.env.THREADS == 'true') {
+          // Create a new thread from the message
+          interaction
+            .startThread({
+              name: threadTitle,
+              autoArchiveDuration: 10080, // Duration until the thread is archived in minutes, it can be '60', '1440', '4320', '10080'
+            })
+            .then((newThread) => {
+              newThread.send(trace.payload.message)
+            })
+            .catch(console.error)
         } else {
           await interaction.reply({
             content: trace.payload.message,

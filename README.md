@@ -131,7 +131,9 @@ On the **Secrets tab**, you can click the **Edit as JSON** button and paste the 
   "VOICEFLOW_API_URL": "https://general-runtime.voiceflow.com",
   "VOICEFLOW_API_KEY": "VF.DM.XXX",
   "VOICEFLOW_VERSION_ID": "XXX",
-  "VOICEFLOW_PROJECT_ID": "XXX"
+  "VOICEFLOW_PROJECT_ID": "XXX",
+  "LIVEANSWERS_CHANNELS": "XXX,XXX,XXX",
+  "THREADS": "true"
 }
 
 ```

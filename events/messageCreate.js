@@ -32,5 +32,22 @@ module.exports = {
       })
       return
     }
+
+    if (process.env.LIVEANSWERS_CHANNELS.includes(message.channel.id)) {
+      let liveAnswer = message
+      liveAnswer.isLive = true
+      const messageWithoutMention = message.content
+        .replace(/^<@\!?(\d+)>/, '')
+        .trim()
+
+      await interact(
+        liveAnswer,
+        message.author.id,
+        false,
+        false,
+        true,
+        messageWithoutMention
+      )
+    }
   },
 }
